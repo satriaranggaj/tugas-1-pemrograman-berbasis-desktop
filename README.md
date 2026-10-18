@@ -27,6 +27,8 @@ satu class yaitu `LogikaRestoran.java`, sehingga **tidak ada logika yang ditulis
 - Menghitung **subtotal**, **diskon 10%**, **promo beli 1 gratis 1**, **pajak 10%**,
   dan **biaya pelayanan Rp20.000**.
 - Tombol **Hitung Total**, **Cetak Struk**, dan **Reset** (dengan konfirmasi).
+- **Total selalu sesuai pesanan terbaru**: setiap ada pesanan baru, hasil hitung sebelumnya
+  otomatis dibatalkan, dan tombol *Cetak Struk* selalu menghitung ulang dari nol.
 - Panel status promo: *"Diskon 10% Aktif"* dan *"Promo Beli 1 Gratis 1 Es Teh Aktif"*.
 - Klik baris pada tabel menu → otomatis terisi di ComboBox pesanan.
 - Penyaring tampilan menu: SEMUA / MAKANAN / MINUMAN.
@@ -81,6 +83,7 @@ AppRestoran/
 ├── RestoranFrame.java   PANEL D : JFrame utama + tombol aksi
 ├── RestoranApp.java     main() versi GUI
 ├── Main.java            versi console
+├── TestLogikaRestoran.java  uji otomatis (main + assert manual, tanpa JUnit)
 ├── docs/
 │   └── screenshot-gui.png
 ├── .gitignore
@@ -98,9 +101,34 @@ cd "C:\path\ke\AppRestoran"         # ganti dengan folder Anda
 javac *.java
 java RestoranApp                  # versi GUI (Swing)
 java Main                         # versi console (terminal)
+java TestLogikaRestoran           # uji otomatis (tidak membuka GUI)
 ```
 
-### 2. NetBeans IDE
+### 2. Menjalankan Uji Otomatis
+
+Tidak memakai JUnit maupun library lain — cukup `main()` dan pemeriksaan manual.
+
+```bash
+javac *.java
+java TestLogikaRestoran           # exit code 0 = lulus, 1 = ada yang gagal
+```
+
+Yang diperiksa:
+
+| # | Uji |
+|---|---|
+| 1 | validasi jumlah (0, negatif, melebihi batas, nilai normal) |
+| 2 | jumlah yang tersimpan selalu valid walau `tambahPesanan()` dipanggil langsung |
+| 3 | maksimal 4 item pesanan + `cariMenu()` di luar 1-8 menghasilkan `null` |
+| 4 | batas diskon (subtotal tepat Rp100.000 vs Rp106.000) |
+| 5 | syarat promo (subtotal > Rp50.000 **dan** Es Teh minimal 2) |
+| 6 | tombol Reset mengosongkan pesanan dan hasil hitung |
+| 7 | total tidak kedaluwarsa: hitung total → tambah item → hitung ulang |
+| 8 | input console: token non-angka dibuang, slot berikutnya tetap terbaca |
+
+GUI **tidak pernah** dijalankan oleh test ini.
+
+### 3. NetBeans IDE
 
 1. **File → New Project → Java with Ant → Java Application**.
 2. Nama proyek `AppRestoran`, **pilih folder** proyek ini, **Finish**.
@@ -109,6 +137,7 @@ java Main                         # versi console (terminal)
    lalu pilih seluruh file `.java`, **Finish**.
 5. Pastikan tidak ada baris `package …;` (semua kelas berada di *default package*).
 6. Klik kanan project → **Run**. Pilih `RestoranApp` (GUI) atau `Main` (console).
+   Untuk test: klik kanan `TestLogikaRestoran.java` → Run File.
 
 ### Kebutuhan
 

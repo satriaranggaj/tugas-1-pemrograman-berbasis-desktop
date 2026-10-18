@@ -53,7 +53,9 @@ public class LogikaRestoran {
     private int bonusPromo = 0;
     private int pajak = 0;
     private int totalBayar = 0;
-    private boolean sudahDihitung = false;  // true setelah Hitung Total ditekan
+    // true = hasil hitungTotal() masih berlaku untuk pesanan saat ini.
+    // menjadi false setiap ada perubahan pesanan (lihat tambahPesanan & reset)
+    private boolean sudahDihitung = false;
 
     // ================= CONSTRUCTOR : MENGISI ARRAY MENU =================
     public LogikaRestoran() {
@@ -128,7 +130,17 @@ public class LogikaRestoran {
     //  METHOD : MENAMBAHKAN PESANAN (pengganti method catatPesanan)
     //  Menyimpan nama, kategori, jumlah, harga satuan, dan subtotal item
     //  ke dalam array, lalu menjumlahkan subtotal keseluruhan.
-    //  Return false bila menu null atau pesanan sudah 4 item.
+    //
+    //  Aturan yang dijaga method ini:
+    //   - menu tidak boleh null
+    //   - maksimal 4 item pesanan (BATAS_PESANAN)
+    //   - jumlah 0 / negatif / lebih dari BATAS_JUMLAH DINORMALKAN
+    //     memakai validasiJumlah(), sehingga rules hanya ada di satu tempat
+    //     dan tetap aman walaupun method ini dipanggil langsung dari luar
+    //     GUI atau console
+    //
+    //  Setiap pesanan baru membuat hasil hitung sebelumnya tidak berlaku
+    //  (sudahDihitung = false), sehingga total/struk tidak pernah kedaluwarsa.
     // ============================================================
     public boolean tambahPesanan(Menu pesanan, int jumlah) {
 
@@ -142,22 +154,29 @@ public class LogikaRestoran {
             return false;
         }
 
+        // jumlah selalu dinormalkan oleh aturan yang sama (validasiJumlah)
+        int jumlahValid = validasiJumlah(jumlah);
+
         // menyimpan ke array pada indeks sesuai jumlah item
         namaPesanan[jumlahItem] = pesanan.getNama();
         kategoriPesanan[jumlahItem] = pesanan.getKategori();
-        jumlahPesanan[jumlahItem] = jumlah;
+        jumlahPesanan[jumlahItem] = jumlahValid;
         hargaSatuan[jumlahItem] = pesanan.getHarga();
-        subtotalItem[jumlahItem] = pesanan.getHarga() * jumlah;      // harga x jumlah
+        subtotalItem[jumlahItem] = pesanan.getHarga() * jumlahValid;      // harga x jumlah
 
         // menjumlahkan subtotal setiap item menjadi subtotal keseluruhan
         subtotalKeseluruhan = subtotalKeseluruhan + subtotalItem[jumlahItem];
 
         // IF : menghitung banyaknya Es Teh yang dibeli (untuk promo)
         if (pesanan.getNama().equalsIgnoreCase(NAMA_MINUMAN_PROMO)) {
-            jumlahBeliPromo = jumlahBeliPromo + jumlah;
+            jumlahBeliPromo = jumlahBeliPromo + jumlahValid;
         }
 
         jumlahItem = jumlahItem + 1;
+
+        // hasil hitung sebelumnya menjadi tidak berlaku karena pesanan berubah
+        sudahDihitung = false;
+
         return true;
     }
 

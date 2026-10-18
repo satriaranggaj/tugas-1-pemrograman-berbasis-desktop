@@ -153,42 +153,86 @@ public class Main {
     }
 
     // ============================================================
-    //  METHOD : MENERIMA NOMOR MENU DARI KEYBOARD  (IF ELSE)
+    //  METHOD : MENERIMA NOMOR MENU DARI KEYBOARD  (IF - ELSE)
+    //
+    //  PENTING: input dibaca per TOKEN dengan next(). Dengan begitu token
+    //  yang tidak valid (misalnya "x") benar-benar dibuang dari Scanner,
+    //  sehingga slot pesanan berikutnya tidak ikut gagal membaca.
+    //  (jika memakai hasNextInt()/nextInt(), token non-angka tidak pernah
+    //   terrainsi sehingga program tersangkut di slot yang sama)
     // ============================================================
     static int inputNomor(Scanner input) {
 
-        if (input.hasNextInt()) {                    // <-- IF
-            return input.nextInt();
-        } else {                                     // <-- ELSE
-            System.out.println("Input bukan angka, pesanan dibatalkan.");
+        // IF : tidak ada input lagi (mis. EOF atau input dialihkan)
+        if (!input.hasNext()) {
+            System.out.println("Input selesai, pesanan dibatalkan.");
+            return 0;               // nomor 0 otomatis tidak valid
+        }
+
+        String token = input.next();        // satu token langsung dibaca & dibuang
+        int nomor = 0;
+        boolean angka = true;
+
+        // mencoba mengubah token menjadi angka
+        try {
+            nomor = Integer.parseInt(token.trim());
+        } catch (NumberFormatException e) {
+            angka = false;
+        }
+
+        // IF ELSE : token berupa angka atau bukan
+        if (angka) {
+            return nomor;
+        } else {
+            System.out.println("Input bukan angka (" + token + "), pesanan dibatalkan.");
             return 0;
         }
     }
 
     // ============================================================
-    //  METHOD : VALIDASI JUMLAH PESANAN  (IF - ELSE IF - ELSE)
-    //  nilai jumlah mengikuti method logika.validasiJumlah(jumlah)
+    //  METHOD : MENERIMA JUMLAH PESANAN DARI KEYBOARD  (IF - ELSE)
+    //  Token non-angka dibuang dengan cara yang sama seperti inputNomor()
+    //  supaya pembacaan slot berikutnya tetap bisa dilanjutkan.
+    //  Aturan jumlah (0 / negatif / lebih dari batas) TIDAK diulang di sini,
+    //  melainkan memakai method milik LogikaRestoran.
     // ============================================================
     static int validasiJumlah(Scanner input, LogikaRestoran logika) {
 
-        int jumlah = 0;
-
-        if (input.hasNextInt()) {                    // <-- IF
-            jumlah = input.nextInt();
-        } else {                                     // <-- ELSE
-            System.out.println("Input bukan angka, jumlah diisi 1.");
+        // IF : tidak ada input lagi
+        if (!input.hasNext()) {
+            System.out.println("Input selesai, jumlah diisi 1.");
             return 1;
         }
 
-        // IF - ELSE IF - ELSE : memberi keterangan ke user
-        if (jumlah <= 0) {                           // <-- IF
-            System.out.println("Jumlah tidak boleh 0 atau negatif, diisi 1.");
-        } else if (jumlah > LogikaRestoran.BATAS_JUMLAH) {   // <-- ELSE IF
-            System.out.println("Maksimal " + LogikaRestoran.BATAS_JUMLAH + " per menu, diisi "
-                    + LogikaRestoran.BATAS_JUMLAH + ".");
+        String token = input.next();        // token langsung dibuang setelah dibaca
+        int jumlahMentah = 0;
+        boolean angka = true;
+
+        try {
+            jumlahMentah = Integer.parseInt(token.trim());
+        } catch (NumberFormatException e) {
+            angka = false;
         }
 
-        // nilai akhirnya diambil dari method yang sama dengan versi GUI
-        return logika.validasiJumlah(jumlah);
+        // IF : token bukan angka -> diisi 1 (sama seperti aturan jumlah minimum)
+        if (!angka) {
+            System.out.println("Input bukan angka (" + token + "), jumlah diisi 1.");
+            return 1;
+        }
+
+        // aturan bisnis tetap milik LogikaRestoran (tidak diduplikasi di sini)
+        int jumlah = logika.validasiJumlah(jumlahMentah);
+
+        // IF ELSE IF : hanya Pemberitahuan ke user, bukan aturan baru
+        if (jumlah != jumlahMentah) {
+            if (jumlahMentah <= 0) {
+                System.out.println("Jumlah tidak boleh 0 atau negatif, diisi 1.");
+            } else {
+                System.out.println("Maksimal " + LogikaRestoran.BATAS_JUMLAH
+                        + " per menu, diisi " + LogikaRestoran.BATAS_JUMLAH + ".");
+            }
+        }
+
+        return jumlah;
     }
 }

@@ -213,10 +213,10 @@ public class RestoranFrame extends JFrame {
             return;
         }
 
-        // IF : total belum pernah dihitung -> hitung dulu
-        if (!logika.isSudahDihitung()) {
-            logika.hitungTotal();
-        }
+        // total SELALU dihitung ulang supaya struk pasti sesuai pesanan terbaru
+        // (dulu hanya dihitung bila belum pernah dihitung, sehingga bisa
+        //  menampilkan daftar pesanan baru dengan total yang sudah lama)
+        logika.hitungTotal();
 
         panelStruk.perbaruiStatus();
         panelStruk.tampilkanStruk();
