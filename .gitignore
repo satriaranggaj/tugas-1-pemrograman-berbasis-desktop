@@ -1,0 +1,18 @@
+# File hasil kompilasi Java
+*.class
+*.jar
+
+# Project NetBeans / Eclipse / IntelliJ
+nbproject/
+build/
+dist/
+.idea/
+*.iml
+.settings/
+.classpath
+.project
+
+# File pendukung sistem operasi
+Thumbs.db
+desktop.ini
+.DS_Store
